@@ -9,9 +9,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Github, Send, MessageCircle, Calendar, Star } from "lucide-react";
-import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Mail, Github, Send, MessageCircle, Calendar, Star, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import emailjs from '@emailjs/browser';
+
+// Form validation types
+interface FormErrors {
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+}
+
+interface FormState {
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  errors: FormErrors;
+}
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -20,26 +36,185 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  
+  const [formState, setFormState] = useState<FormState>({
+    isSubmitting: false,
+    isSuccess: false,
+    errors: {},
+  });
+
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the form data to your backend
-    toast({
-      title: "Message sent!",
-      description: "Thank you for reaching out. I'll get back to you soon.",
-    });
-    setFormData({ name: "", email: "", subject: "", message: "" });
+  // EmailJS configuration (you'll need to set these up in your EmailJS account)
+  // You can either set these directly or use environment variables
+  const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_your_service_id';
+  const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_your_template_id';
+  const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'your_public_key';
+
+  // Form validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = (): FormErrors => {
+    const errors: FormErrors = {};
+
+    if (!formData.name.trim()) {
+      errors.name = "Name is required";
+    } else if (formData.name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters";
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.subject.trim()) {
+      errors.subject = "Subject is required";
+    } else if (formData.subject.trim().length < 5) {
+      errors.subject = "Subject must be at least 5 characters";
+    }
+
+    if (!formData.message.trim()) {
+      errors.message = "Message is required";
+    } else if (formData.message.trim().length < 10) {
+      errors.message = "Message must be at least 10 characters";
+    }
+
+    return errors;
+  };
+
+  // Real-time validation
+  const validateField = (name: string, value: string): string | undefined => {
+    switch (name) {
+      case 'name':
+        if (!value.trim()) return "Name is required";
+        if (value.trim().length < 2) return "Name must be at least 2 characters";
+        break;
+      case 'email':
+        if (!value.trim()) return "Email is required";
+        if (!validateEmail(value)) return "Please enter a valid email address";
+        break;
+      case 'subject':
+        if (!value.trim()) return "Subject is required";
+        if (value.trim().length < 5) return "Subject must be at least 5 characters";
+        break;
+      case 'message':
+        if (!value.trim()) return "Message is required";
+        if (value.trim().length < 10) return "Message must be at least 10 characters";
+        break;
+    }
+    return undefined;
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    const { name, value } = e.target;
+    
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
+    }));
+
+    // Real-time validation
+    const error = validateField(name, value);
+    setFormState((prev) => ({
+      ...prev,
+      errors: {
+        ...prev.errors,
+        [name]: error,
+      },
     }));
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormState((prev) => ({ ...prev, errors }));
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFormState((prev) => ({ ...prev, isSubmitting: true, errors: {} }));
+
+    try {
+      // Check if EmailJS is properly configured
+      if (EMAILJS_PUBLIC_KEY === 'your_public_key' || !EMAILJS_PUBLIC_KEY) {
+        throw new Error('EmailJS not configured');
+      }
+
+      // Initialize EmailJS
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_name: "Profy",
+      };
+
+      // Send email
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+      );
+
+      // Success
+      setFormState((prev) => ({ ...prev, isSubmitting: false, isSuccess: true }));
+      
+      toast({
+        title: "Message sent successfully! 🎉",
+        description: "Thank you for reaching out. I'll get back to you within 8 hours.",
+      });
+
+      // Reset form after success
+      setTimeout(() => {
+        setFormData({ name: "", email: "", subject: "", message: "" });
+        setFormState({ isSubmitting: false, isSuccess: false, errors: {} });
+      }, 2000);
+
+    } catch (error) {
+      console.error('EmailJS Error:', error);
+      
+      setFormState((prev) => ({ ...prev, isSubmitting: false }));
+      
+      // Check if it's a configuration error
+      if (error instanceof Error && error.message === 'EmailJS not configured') {
+        toast({
+          title: "Email service not configured",
+          description: "Please contact me directly at profy2032@gmail.com or set up EmailJS configuration.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Failed to send message",
+          description: "Something went wrong. Please try again or contact me directly at profy2032@gmail.com",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // Reset success state when form data changes
+  useEffect(() => {
+    if (formState.isSuccess) {
+      setFormState((prev) => ({ ...prev, isSuccess: false }));
+    }
+  }, [formData]);
 
   return (
     <section id="contact" className="py-20 px-6 relative overflow-hidden">
@@ -85,64 +260,145 @@ const Contact = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Success Message */}
+              {formState.isSuccess && (
+                <Alert className="mb-6 border-green-500/50 bg-green-500/10">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <AlertDescription className="text-green-300">
+                    Message sent successfully! I'll get back to you soon.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-gray-300 font-medium">Name</Label>
+                    <Label htmlFor="name" className="text-gray-300 font-medium">
+                      Name <span className="text-red-400">*</span>
+                    </Label>
                     <Input
                       id="name"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="glass-effect border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50 transition-all duration-300 hover:border-purple-400/50"
+                      className={`glass-effect transition-all duration-300 hover:border-purple-400/50 ${
+                        formState.errors.name
+                          ? "border-red-500/50 focus:border-red-400 focus:ring-red-400/50"
+                          : "border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50"
+                      }`}
                       placeholder="Your full name"
-                      required
+                      disabled={formState.isSubmitting}
+                      aria-describedby={formState.errors.name ? "name-error" : undefined}
+                      aria-invalid={!!formState.errors.name}
                     />
+                    {formState.errors.name && (
+                      <p id="name-error" className="text-sm text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {formState.errors.name}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-300 font-medium">Email</Label>
+                    <Label htmlFor="email" className="text-gray-300 font-medium">
+                      Email <span className="text-red-400">*</span>
+                    </Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="glass-effect border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50 transition-all duration-300 hover:border-purple-400/50"
+                      className={`glass-effect transition-all duration-300 hover:border-purple-400/50 ${
+                        formState.errors.email
+                          ? "border-red-500/50 focus:border-red-400 focus:ring-red-400/50"
+                          : "border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50"
+                      }`}
                       placeholder="your.email@example.com"
-                      required
+                      disabled={formState.isSubmitting}
+                      aria-describedby={formState.errors.email ? "email-error" : undefined}
+                      aria-invalid={!!formState.errors.email}
                     />
+                    {formState.errors.email && (
+                      <p id="email-error" className="text-sm text-red-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {formState.errors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-gray-300 font-medium">Subject</Label>
+                  <Label htmlFor="subject" className="text-gray-300 font-medium">
+                    Subject <span className="text-red-400">*</span>
+                  </Label>
                   <Input
                     id="subject"
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="glass-effect border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50 transition-all duration-300 hover:border-purple-400/50"
+                    className={`glass-effect transition-all duration-300 hover:border-purple-400/50 ${
+                      formState.errors.subject
+                        ? "border-red-500/50 focus:border-red-400 focus:ring-red-400/50"
+                        : "border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50"
+                    }`}
                     placeholder="What's this about?"
-                    required
+                    disabled={formState.isSubmitting}
+                    aria-describedby={formState.errors.subject ? "subject-error" : undefined}
+                    aria-invalid={!!formState.errors.subject}
                   />
+                  {formState.errors.subject && (
+                    <p id="subject-error" className="text-sm text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {formState.errors.subject}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="text-gray-300 font-medium">Message</Label>
+                  <Label htmlFor="message" className="text-gray-300 font-medium">
+                    Message <span className="text-red-400">*</span>
+                  </Label>
                   <Textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    className="glass-effect border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50 transition-all duration-300 hover:border-purple-400/50 min-h-32 resize-none"
+                    className={`glass-effect transition-all duration-300 hover:border-purple-400/50 min-h-32 resize-none ${
+                      formState.errors.message
+                        ? "border-red-500/50 focus:border-red-400 focus:ring-red-400/50"
+                        : "border-purple-500/30 focus:border-purple-400 focus:ring-purple-400/50"
+                    }`}
                     placeholder="Tell me about your project, goals, and how I can help..."
-                    required
+                    disabled={formState.isSubmitting}
+                    aria-describedby={formState.errors.message ? "message-error" : undefined}
+                    aria-invalid={!!formState.errors.message}
                   />
+                  {formState.errors.message && (
+                    <p id="message-error" className="text-sm text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {formState.errors.message}
+                    </p>
+                  )}
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 group"
+                  disabled={formState.isSubmitting || formState.isSuccess}
+                  className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 group disabled:hover:scale-100 disabled:hover:shadow-none"
                 >
-                  <Send className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-                  Send Message
+                  {formState.isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Sending Message...
+                    </>
+                  ) : formState.isSuccess ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Message Sent!
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+                      Send Message
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>

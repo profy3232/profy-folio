@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Code, Briefcase, User, Mail } from "lucide-react";
+import { Menu, X, Code, Briefcase, User, Mail, Home } from "lucide-react";
 import avatar from "@/assets/hero.png";
 
 const Navigation = () => {
@@ -30,14 +30,28 @@ const Navigation = () => {
     setIsOpen(false);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsOpen(false);
+  };
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'cyber-border bg-background/80 backdrop-blur-md' : 'bg-transparent'
       }`}>
       <div className="container mx-auto px-6">
-        <div className="flex h-16 items-center justify-center">
+        <div className="flex h-16 items-center justify-between">
+          
+          {/* Logo */}
+          <button
+            onClick={scrollToTop}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-ethereum/20 hover:bg-ethereum/30 transition-all duration-200 hover:scale-105"
+            aria-label="Go to top"
+          >
+            <Home className="h-5 w-5 text-ethereum" />
+          </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-center gap-8 text-xl">
+          <div className="hidden md:flex items-center gap-8 text-xl">
             {navItems.map((item, index) => (
               <button
                 key={index}
