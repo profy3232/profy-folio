@@ -50,7 +50,7 @@ const Hero = () => {
 
               {/* Role */}
               <p className="inline-block px-4 py-1 text-sm font-medium rounded-full bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30 shadow-sm">
-                Defi & NFT & Trading Bot Builder
+                Web3 Architect  &  Smart Contract Engineer
               </p>
             </div>
           </div>
@@ -68,7 +68,7 @@ const Hero = () => {
 
               {/* Main Heading */}
               <h1 className="text-3xl md:text-3xl font-extrabold mb-8 ml-12 leading-[1.2] tracking-tight">
-                <span className="block gradient-text from-solana to-solana-secondary">Let's Build the Future Together
+                <span className="block gradient-text from-solana to-solana-secondary">Let's make your dreams come true together
                 </span>
               </h1>
 

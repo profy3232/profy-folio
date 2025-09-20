@@ -64,7 +64,7 @@ const Contact = () => {
           </h2>
           <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-cyan-500 mx-auto rounded-full mb-6" />
           <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Ready to bring your AI project to life? Let's discuss how we can work together.
+            Ready to bring your project to life? Let's discuss how we can work together.
           </p>
         </div>
 
@@ -175,7 +175,7 @@ const Contact = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-white mb-1">GitHub</h3>
-                    <p className="text-gray-400 text-lg">profy916</p>
+                    <p className="text-gray-400 text-lg">profy3232</p>
                     <p className="text-sm text-cyan-300 mt-1">Check out my projects</p>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ const Contact = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-white mb-1">Discord</h3>
-                    <p className="text-gray-400 text-lg">profy2032916</p>
+                    <p className="text-gray-400 text-lg">profy3232</p>
                     <p className="text-sm text-green-300 mt-1">Join my community</p>
                   </div>
                 </div>

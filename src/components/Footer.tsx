@@ -13,8 +13,7 @@ const Footer = () => {
           <div className="text-center md:text-left">
             <p className="text-2xl mb-2 block">Profy</p>
             <p className="text-muted-foreground">
-              Defi & NFT & Trading Bot Builder
-              
+              Web3 Architect  &  Smart Contract Engineer
             </p>
           </div>
 
@@ -28,7 +27,7 @@ const Footer = () => {
               <span>profy2032@gmail.com</span>
             </a>
             <a
-              href="https://github.com/profy916"
+              href="https://github.com/profy3232"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 text-muted-foreground hover:text-white transition-colors"

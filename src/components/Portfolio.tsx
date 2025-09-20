@@ -210,7 +210,11 @@ const Portfolio = () => {
 
           {/* View More CTA */}
           <div className="text-center mt-16">
-            <Button variant="neon" size="lg">
+            <Button
+              variant="neon"
+              size="lg"
+              onClick={() => window.open("https://github.com/profy3232", "_blank")}
+            >
               <Github className="mr-2 h-4 w-4" />
               View All Projects on GitHub
             </Button>
