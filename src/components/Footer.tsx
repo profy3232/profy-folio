@@ -20,11 +20,11 @@ const Footer = () => {
           {/* Contact Information */}
           <div className="flex flex-col space-y-3">
             <a
-              href="mailto:profy2032@gmail.com"
+              href="mailto:profy3232@gmail.com"
               className="flex items-center space-x-2 text-muted-foreground hover:text-white transition-colors"
             >
               <Mail className="w-4 h-4" />
-              <span>profy2032@gmail.com</span>
+              <span>profy3232@gmail.com</span>
             </a>
             <a
               href="https://github.com/profy3232"

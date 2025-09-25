@@ -196,13 +196,13 @@ const Contact = () => {
       if (error instanceof Error && error.message === 'EmailJS not configured') {
         toast({
           title: "Email service not configured",
-          description: "Please contact me directly at profy2032@gmail.com or set up EmailJS configuration.",
+          description: "Please contact me directly at profy3232@gmail.com or set up EmailJS configuration.",
           variant: "destructive",
         });
       } else {
         toast({
           title: "Failed to send message",
-          description: "Something went wrong. Please try again or contact me directly at profy2032@gmail.com",
+          description: "Something went wrong. Please try again or contact me directly at profy3232@gmail.com",
           variant: "destructive",
         });
       }
@@ -415,7 +415,7 @@ const Contact = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-white mb-1">Email</h3>
-                    <p className="text-gray-400 text-lg">profy2032@gmail.com</p>
+                    <p className="text-gray-400 text-lg">profy3232@gmail.com</p>
                     <p className="text-sm text-purple-300 mt-1">I'll respond within 8 hours</p>
                   </div>
                 </div>
