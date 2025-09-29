@@ -25,14 +25,6 @@ const Portfolio = () => {
       stats: { tvl: "$1.2M", users: "5.2K", apy: "24%" },
       links: { github: "https://github.com/profy3232/Solana-Spl-Token-Swap-Platform", live: "https://spl-token-swap.vercel.app/" }
     },
-    {
-      title: "Crypto Casino Game",
-      description: "This is Crypto Casino Game platform",
-      image: CrypoCasinoImage,
-      technologies: ["React Vite", "TypeScript", "NodeJs", "Ethers", "Back-end"],
-      stats: { bridged: "$2.1M", txs: "15K", chains: "3" },
-      links: { github: "https://github.com/profy3232/Crypto-Casino", live: "https://redowex.com" }
-    },
 
     {
       title: "Crypto Trading Protocol on B2 Network",
